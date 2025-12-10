@@ -52,7 +52,7 @@ fi
 LOGFILE=/tmp/tdx-guest-setup.txt
 FORCE_RECREATE=false
 TMP_GUEST_IMG_PATH="/tmp/tdx-guest-tmp.qcow2"
-SIZE=100
+SIZE=8
 GUEST_USER=${GUEST_USER:-"tdx"}
 GUEST_PASSWORD=${GUEST_PASSWORD:-"123456"}
 GUEST_HOSTNAME=${GUEST_HOSTNAME:-"tdx-guest"}
@@ -237,8 +237,8 @@ resize_guest_image() {
     qemu-img resize ${TMP_GUEST_IMG_PATH} +${SIZE}G
     virt-customize -a ${TMP_GUEST_IMG_PATH} \
         --no-network \
-        --run-command 'growpart /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_hd0 1' \
-        --run-command 'resize2fs /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_hd0-part1' \
+        --run-command 'growpart /dev/sda 1 || growpart /dev/vda 1 || true' \
+        --run-command 'resize2fs /dev/sda1 || resize2fs /dev/vda1 || true' \
         --run-command 'systemctl mask pollinate.service'
     if [ $? -eq 0 ]; then
         ok "Resize the guest image to ${SIZE}G"
